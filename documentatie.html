@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentatie</title>
+</head>
+<body>
+  <h1>API Documentatie</h1>
+  <p>Dit is een eenvoudige documentatie voor de gebruikers API.</p>
+
+  <h2>Endpoints</h2>
+  <ul>
+    <li><strong>GET /users</strong>: Haalt alle gebruikers op (met paginering via query parameters: <code>?limit=10&offset=0</code>)</li>
+    <li><strong>POST /users</strong>: Voegt een nieuwe gebruiker toe (vereist naam en e-mail)</li>
+    <li><strong>GET /users/:id</strong>: Haalt een gebruiker op met een bepaald ID</li>
+    <li><strong>PUT /users/:id</strong>: Werkt een gebruiker bij (vereist naam en e-mail)</li>
+    <li><strong>DELETE /users/:id</strong>: Verwijdert een gebruiker met een bepaald ID</li>
+  </ul>
+
+  <p><strong>Opmerking:</strong> Alle velden moeten correct zijn ingevuld en voldoen aan de validaties (zoals geen cijfers in de naam, en een geldig e-mailadres).</p>
+</body>
+</html>

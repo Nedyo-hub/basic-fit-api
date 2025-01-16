@@ -149,6 +149,12 @@ app.delete('/users/:id', (req, res) => {
     });
 });
 
+const path = require('path'); 
+app.get('/docs', (req, res) => {
+  res.sendFile(path.join(__dirname, 'documentatie.html')); 
+});
+
+
 // Start de server
 app.listen(PORT, () => {
   console.log(`Server draait op http://localhost:${PORT}`);
