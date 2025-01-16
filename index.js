@@ -5,6 +5,7 @@ const PORT = 3000;
 // Databaseconfiguratie
 const db = require('./db/knex');
 
+
 db.schema.hasTable('users').then((exists) => {
   if (!exists) {
     return db.schema.createTable('users', (table) => {
@@ -47,19 +48,30 @@ const validateUser = (req, res, next) => {
 };
 
 // Routes
-// Haal alle gebruikers op met paginering (limit en offset)
+// Haal alle gebruikers op met paginering en zoekfunctionaliteit
 app.get('/users', (req, res) => {
-  const { limit = 10, offset = 0 } = req.query; // Default limit = 10, offset = 0
+  const { limit = 10, offset = 0, search = '' } = req.query; // Default limit = 10, offset = 0
 
   // Valideer dat de limit en offset getallen zijn
   if (isNaN(limit) || isNaN(offset)) {
     return res.status(400).json({ message: 'Limit en offset moeten getallen zijn.' });
   }
 
+  const searchQuery = search.trim().toLowerCase();
+
   db('users')
     .select('*')
     .limit(parseInt(limit))
     .offset(parseInt(offset))
+    .modify((queryBuilder) => {
+      // Zoek naar gebruikers die de zoekterm bevatten in name of email
+      if (searchQuery) {
+        queryBuilder.where(function() {
+          this.where('name', 'like', `%${searchQuery}%`)
+            .orWhere('email', 'like', `%${searchQuery}%`);
+        });
+      }
+    })
     .then((users) => {
       res.status(200).json(users);
     })
@@ -68,7 +80,7 @@ app.get('/users', (req, res) => {
     });
 });
 
-// Voeg nieuwe gebruiker toe
+// Voeg een nieuwe gebruiker toe
 app.post('/users', validateUser, (req, res) => {
   const { name, email } = req.body;
 
@@ -82,7 +94,7 @@ app.post('/users', validateUser, (req, res) => {
     });
 });
 
-// Haal gebruiker op met bepaald id
+// Haal gebruiker op met een bepaald id
 app.get('/users/:id', (req, res) => {
   const { id } = req.params;
 
