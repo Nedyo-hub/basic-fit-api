@@ -23,11 +23,43 @@ db.schema.hasTable('users').then((exists) => {
 // Middleware
 app.use(express.json());
 
+// Validatiefuncties
+const validateUser = (req, res, next) => {
+  const { name, email } = req.body;
+
+  // Controleer of de velden niet leeg zijn
+  if (!name || !email) {
+    return res.status(400).json({ message: 'Naam en e-mailadres zijn verplicht.' });
+  }
+
+  // Controleer of de naam geen cijfers bevat
+  if (/\d/.test(name)) {
+    return res.status(400).json({ message: 'De naam mag geen cijfers bevatten.' });
+  }
+
+  // Controleer of het e-mailadres geldig is 
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ message: 'Ongeldig e-mailadres.' });
+  }
+
+  next(); 
+};
+
 // Routes
-// Haal alle gebruikers op
+// Haal alle gebruikers op met paginering (limit en offset)
 app.get('/users', (req, res) => {
+  const { limit = 10, offset = 0 } = req.query; // Default limit = 10, offset = 0
+
+  // Valideer dat de limit en offset getallen zijn
+  if (isNaN(limit) || isNaN(offset)) {
+    return res.status(400).json({ message: 'Limit en offset moeten getallen zijn.' });
+  }
+
   db('users')
     .select('*')
+    .limit(parseInt(limit))
+    .offset(parseInt(offset))
     .then((users) => {
       res.status(200).json(users);
     })
@@ -37,7 +69,7 @@ app.get('/users', (req, res) => {
 });
 
 // Voeg nieuwe gebruiker toe
-app.post('/users', (req, res) => {
+app.post('/users', validateUser, (req, res) => {
   const { name, email } = req.body;
 
   db('users')
@@ -69,7 +101,7 @@ app.get('/users/:id', (req, res) => {
 });
 
 // Werk gebruiker bij
-app.put('/users/:id', (req, res) => {
+app.put('/users/:id', validateUser, (req, res) => {
   const { id } = req.params;
   const { name, email } = req.body;
 
