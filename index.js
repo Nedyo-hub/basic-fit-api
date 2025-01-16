@@ -5,7 +5,6 @@ const PORT = 3000;
 // Databaseconfiguratie
 const db = require('./db/knex');
 
-
 db.schema.hasTable('users').then((exists) => {
   if (!exists) {
     return db.schema.createTable('users', (table) => {
@@ -26,7 +25,7 @@ app.use(express.json());
 
 // Validatiefuncties
 const validateUser = (req, res, next) => {
-  const { name, email } = req.body;
+  const { name, email, phone, start_date, end_date } = req.body;
 
   // Controleer of de velden niet leeg zijn
   if (!name || !email) {
@@ -42,6 +41,16 @@ const validateUser = (req, res, next) => {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({ message: 'Ongeldig e-mailadres.' });
+  }
+
+  // Controleer of het telefoonnummer geldig is 
+  if (phone && !/^\+32 \d{3} \d{2} \d{2} \d{2}$/.test(phone)) {
+    return res.status(400).json({ message: 'Ongeldig telefoonnummer. Gebruik het formaat: +32 444 44 44 44.' });
+  }
+
+  // Controleer of de einddatum na de startdatum valt
+  if (start_date && end_date && new Date(start_date) > new Date(end_date)) {
+    return res.status(400).json({ message: 'De einddatum moet na de startdatum liggen.' });
   }
 
   next(); 
